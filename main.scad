@@ -119,15 +119,41 @@ module mity_beam(length,x1,y1,x2,y2,x3,y3,x4,y4)
 {
     mity_beam_support(x=x1,y=y1);    
     mity_beam_support(x=x2,y=y2);
-    translate([x1+(x2-x1)/2,y1+(y2-y1)/2,0]) cube([abs(x2-x1)-BASE_THICKNESS,MITY_BEAM_THICKNESS,BASE_HEIGHT],center=true);
-    translate([x1,y2/2+MITY_BEAM_THICKNESS/4-BASE_THICKNESS/4,0]) cube([MITY_BEAM_THICKNESS,abs(y2)-BASE_THICKNESS/2-MITY_BEAM_THICKNESS/2,BASE_HEIGHT],center=true);
-    translate([x2,y2/2+MITY_BEAM_THICKNESS/4-BASE_THICKNESS/4,0]) cube([MITY_BEAM_THICKNESS,abs(y2)-BASE_THICKNESS/2-MITY_BEAM_THICKNESS/2,BASE_HEIGHT],center=true);
+    
+    if (y1>0)
+    {
+        translate([x1,y1/2+MITY_BEAM_THICKNESS/4-BASE_THICKNESS/4,0]) color ([0,0,1]) cube([MITY_BEAM_THICKNESS,abs(y1)-BASE_THICKNESS/2-MITY_BEAM_THICKNESS/2,BASE_HEIGHT],center=true);
+    }
+    else
+    {
+        translate([x1,-y1/2+MITY_BEAM_THICKNESS/4-BASE_THICKNESS/4,0]) color ([0,0,1]) cube([MITY_BEAM_THICKNESS,abs(y1)-BASE_THICKNESS/2-MITY_BEAM_THICKNESS/2,BASE_HEIGHT],center=true);
+    }     
+   
+    
+    if (y2>0)
+    {
+        translate([x2,-y2/2+MITY_BEAM_THICKNESS/4-BASE_THICKNESS/4,0]) color ([1,0,0]) cube([MITY_BEAM_THICKNESS,abs(y2)-BASE_THICKNESS/2-MITY_BEAM_THICKNESS/2,BASE_HEIGHT],center=true);
+    }
+    else
+    {
+        translate([x2,y2/2-MITY_BEAM_THICKNESS/4+BASE_THICKNESS/4,0]) color ([0,1,0]) cube([MITY_BEAM_THICKNESS,abs(y2)-BASE_THICKNESS/2-MITY_BEAM_THICKNESS/2,BASE_HEIGHT],center=true);
+    }
     mity_beam_support(x=x3,y=y3);
     mity_beam_support(x=x4,y=y4);
-    translate([x3+(x4-x3)/2,y3+(y4-y3)/2,0]) cube([abs(x4-x3)-BASE_THICKNESS,MITY_BEAM_THICKNESS,BASE_HEIGHT],center=true);
-    translate([x3,y3/2+MITY_BEAM_THICKNESS/4-BASE_THICKNESS/4,0]) cube([MITY_BEAM_THICKNESS,abs(y3)-BASE_THICKNESS/2-MITY_BEAM_THICKNESS/2,BASE_HEIGHT],center=true);
+    if (y3>0)
+    {
+        translate([x3,-y3/2-MITY_BEAM_THICKNESS/4+BASE_THICKNESS/4,0]) color ([1,1,0]) cube([MITY_BEAM_THICKNESS,abs(y3)-BASE_THICKNESS/2-MITY_BEAM_THICKNESS/2,BASE_HEIGHT],center=true);
+    }
+    else
+    {
+        translate([x3,y3/2+MITY_BEAM_THICKNESS/4-BASE_THICKNESS/4,0]) color ([1,0,0]) cube([MITY_BEAM_THICKNESS,abs(y3)-BASE_THICKNESS/2-MITY_BEAM_THICKNESS/2,BASE_HEIGHT],center=true);
+    }
     translate([x4,y3/2+MITY_BEAM_THICKNESS/4-BASE_THICKNESS/4,0]) cube([MITY_BEAM_THICKNESS,abs(y3)-BASE_THICKNESS/2-MITY_BEAM_THICKNESS/2,BASE_HEIGHT],center=true);
+    
+    //Main support
     cube([length,MITY_BEAM_THICKNESS,BASE_HEIGHT],center=true);
+    
+    //Fixers
     translate([length/2-MITY_BEAM_TRAP_PART/2,0,0]) mity_beam_fixer();
     translate([-length/2+MITY_BEAM_TRAP_PART/2,0,0]) mirror([1,0,0]) mity_beam_fixer();    
     
@@ -537,7 +563,10 @@ module adapter1()
         }
     }
 }
-
+module singlebeamsupport(x1,y1,x2,y2,x3,y3,x4,y4)
+{
+    mity_beam(length=TOWER_WIDTH-BASE_THICKNESS,x1=x1,y1=y1,x2=x2,y2=y2,x3=x3,y3=y3,x4=x4,y4=y4);
+}
 //Assembly
 main_assembly();
 //Pieces
