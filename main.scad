@@ -32,6 +32,137 @@ PINE64_BEAM_HEIGHT=3.3;
 
 LEG_INTERFACE_THICKNESS=2;
 EXTRA_LEG_WIDTH=30;
+
+WALL_BASE_THICKNESS=1.2;
+WALL_MOUNT_THICKNESS=3;
+WALL_MOUNT_WIDTH=BASE_THICKNESS;
+FAN_HOLES_DIST=82.5;
+FAN_LINING_WIDTH=2;
+FAN_ZIP_TIE_DIST=3;
+FAN_ZIP_TIE_L1=1.5;
+FAN_ZIP_TIE_L2=4.75;
+FAN_CABLE_CUTOUT_RAD=8;
+FAN_CABLE_FROM_TOP_BOTTOM=10;
+FAN_CABLE_FROM_LEFT_RIGHT=4;
+
+module tower_wall_mount(block,hole)
+{
+    temp=WALL_MOUNT_THICKNESS/2-WALL_BASE_THICKNESS/2;
+    if (block==true)
+    {
+        translate([0,0,temp]) cube([WALL_MOUNT_WIDTH,WALL_MOUNT_WIDTH,WALL_MOUNT_THICKNESS],center=true);
+    }
+    if (hole==true)
+    {
+        translate([0,0,-0.05-WALL_MOUNT_THICKNESS/2+temp]) color([0,1,0])
+        hex_hole(h_trap=WALL_MOUNT_THICKNESS/2,h_hole=WALL_MOUNT_THICKNESS/2+0.1,r_trap=SCREWSTANDARD_M3,rot=0);
+    }
+}
+module tower_wall_fan_mount(block,hole)
+{
+    temp=WALL_MOUNT_THICKNESS/2-WALL_BASE_THICKNESS/2;
+    if (block==true)
+    {
+        translate([0,0,temp]) cube([WALL_MOUNT_WIDTH,WALL_MOUNT_WIDTH,WALL_MOUNT_THICKNESS],center=true);
+    }
+    if (hole==true)
+    {
+        translate([0,0,+0.05+WALL_MOUNT_THICKNESS/2+temp]) color([0,1,0]) hex_hole(h_trap=WALL_MOUNT_THICKNESS/2,h_hole=WALL_MOUNT_THICKNESS/2+0.1,r_trap=SCREWSTANDARD_M3,rot=180);
+    }
+}
+module tower_wall_front_rear()
+{
+    cube([TOWER_HEIGHT+BASE_THICKNESS*2,TOWER_WIDTH+BASE_THICKNESS,WALL_BASE_THICKNESS],center=true);
+}
+module fan_cutout(ziptieN,ziptieS,ziptieW,ziptieE)
+{
+    cylinder(h=WALL_BASE_THICKNESS,r=FAN_CABLE_CUTOUT_RAD,center=true);
+    if (ziptieN==true)
+    {
+        translate([-(FAN_CABLE_CUTOUT_RAD+FAN_ZIP_TIE_DIST),0,0]) cube([FAN_ZIP_TIE_L1,FAN_ZIP_TIE_L2,WALL_BASE_THICKNESS+0.1],center=true);
+    }
+    if (ziptieS==true)
+    {
+        translate([(FAN_CABLE_CUTOUT_RAD+FAN_ZIP_TIE_DIST),0,0]) cube([FAN_ZIP_TIE_L1,FAN_ZIP_TIE_L2,WALL_BASE_THICKNESS+0.1],center=true);
+    }
+    if (ziptieW==true)
+    {
+        translate([0,-(FAN_CABLE_CUTOUT_RAD+FAN_ZIP_TIE_DIST),0]) cube([FAN_ZIP_TIE_L2,FAN_ZIP_TIE_L1,WALL_BASE_THICKNESS+0.1],center=true);
+    }
+    if (ziptieE==true)
+    {
+        translate([0,(FAN_CABLE_CUTOUT_RAD+FAN_ZIP_TIE_DIST),0]) cube([FAN_ZIP_TIE_L2,FAN_ZIP_TIE_L1,WALL_BASE_THICKNESS+0.1],center=true);
+    }
+}
+module tower_panel_fan()
+{
+    local_height=TOWER_HEIGHT+BASE_THICKNESS*2;
+    difference()
+    {
+        union()
+        {
+            //Main panel
+            color([1,0,0])tower_wall_front_rear();
+            //Wall mounting blocks
+            for (j=[1,-1]){
+                for (i=[2,1,-1,-2]){
+                    translate([j*(TOWER_HEIGHT/2+BASE_THICKNESS/2),i*PITCH1,0])tower_wall_mount(block=true);
+                }
+            }
+            //Fan fixing blocks
+            for (j=[1,-1]){
+                for (i=[1,-1]){
+                    translate([j*FAN_HOLES_DIST/2,i*FAN_HOLES_DIST/2,0])tower_wall_fan_mount(block=true);
+                }
+            }
+            //Fan lining
+            lining_thickness=WALL_MOUNT_THICKNESS-WALL_BASE_THICKNESS;
+            for (j=[1,-1]){
+                translate([j*(FAN_HOLES_DIST/2+WALL_MOUNT_WIDTH/2-FAN_LINING_WIDTH/2),0,WALL_BASE_THICKNESS/2+lining_thickness/2])cube([FAN_LINING_WIDTH,FAN_HOLES_DIST-WALL_MOUNT_WIDTH,lining_thickness],center=true);
+            }
+            for (j=[1,-1]){
+                translate([0,j*(FAN_HOLES_DIST/2+WALL_MOUNT_WIDTH/2-FAN_LINING_WIDTH/2),WALL_BASE_THICKNESS/2+lining_thickness/2])cube([FAN_HOLES_DIST-WALL_MOUNT_WIDTH,FAN_LINING_WIDTH,lining_thickness],center=true);
+            }
+        }
+        union()
+        {
+            //Main fain cutout
+            cube([FAN_HOLES_DIST-WALL_MOUNT_WIDTH,FAN_HOLES_DIST-WALL_MOUNT_WIDTH,WALL_BASE_THICKNESS+0.1],center=true);
+            cylinder(r=FAN_HOLES_DIST/2+2,h=WALL_BASE_THICKNESS+0.1,center=true);
+            //Wall mounting blocks
+            for (j=[1,-1]){
+                for (i=[2,1,-1,-2]){
+                    translate([j*(TOWER_HEIGHT/2+BASE_THICKNESS/2),i*PITCH1,0])tower_wall_mount(hole=true);
+                }
+            }
+            //Fan fixing blocks
+            for (j=[1,-1]){
+                for (i=[1,-1]){
+                    translate([j*FAN_HOLES_DIST/2,i*FAN_HOLES_DIST/2,0])tower_wall_fan_mount(hole=true);
+                }
+            }
+            //Cable cutouts
+            for (i=[1,-1]){
+                for (j=[1,-1]){
+                translate([j*(local_height/2-FAN_CABLE_CUTOUT_RAD-FAN_CABLE_FROM_TOP_BOTTOM),i*(TOWER_WIDTH/2-FAN_CABLE_CUTOUT_RAD-FAN_CABLE_FROM_LEFT_RIGHT),0]) fan_cutout(ziptieN=(j==1),ziptieS=(j==-1),ziptieW=(i==1),ziptieE=(i==-1));
+                translate([0,i*(TOWER_WIDTH/2-FAN_CABLE_CUTOUT_RAD-FAN_CABLE_FROM_LEFT_RIGHT),0]) fan_cutout(ziptieN=true,ziptieS=true,ziptieW=(i==1),ziptieE=(i==-1));
+                
+                }
+                
+            }
+        }
+    }
+    
+    
+    
+    
+}
+
+module tower_wall_assembly()
+{
+    translate([TOWER_LENGTH/2+BASE_THICKNESS/2+WALL_BASE_THICKNESS/2,0,0]) rotate([0,90,0])tower_panel_fan();
+}
+tower_wall_assembly();
 module pine64_beam_support_block_only(x,y)
 {
     

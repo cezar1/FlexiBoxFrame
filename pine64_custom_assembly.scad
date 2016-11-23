@@ -22,7 +22,9 @@ intersection(){
 translate([-100,0,0])#cube([200,200,200],center=true);
 pine64_beams_assembly();}
 */
-
+/*
 POWER_HOLES_LENGTH=58;
 POWER_HOLES_WIDTH=34.75;
 singlebeamsupport(x1=-POWER_HOLES_LENGTH/2,y1=POWER_HOLES_WIDTH/2,x2=-POWER_HOLES_LENGTH/2,y2=-POWER_HOLES_WIDTH/2,x3=POWER_HOLES_LENGTH/2,y3=POWER_HOLES_WIDTH/2,x4=POWER_HOLES_LENGTH/2,y4=-POWER_HOLES_WIDTH/2);
+*/
+tower_panel_fan();
