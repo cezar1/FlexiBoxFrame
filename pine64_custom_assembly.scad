@@ -27,4 +27,27 @@ POWER_HOLES_LENGTH=58;
 POWER_HOLES_WIDTH=34.75;
 singlebeamsupport(x1=-POWER_HOLES_LENGTH/2,y1=POWER_HOLES_WIDTH/2,x2=-POWER_HOLES_LENGTH/2,y2=-POWER_HOLES_WIDTH/2,x3=POWER_HOLES_LENGTH/2,y3=POWER_HOLES_WIDTH/2,x4=POWER_HOLES_LENGTH/2,y4=-POWER_HOLES_WIDTH/2);
 */
-tower_panel_fan();
+//tower_panel_fan();
+/*Male side beams
+LENGTH=300;
+WIDTH=30;
+HEIGHT=10;
+intersection(){
+translate([-LENGTH/2+20,0,0])#cube([LENGTH,WIDTH,HEIGHT],center=true);
+generate_side_beams();
+}
+*/
+/*//Female side beams
+rotate([180,0,0]){
+LENGTH=250;
+WIDTH=30;
+HEIGHT=10;
+intersection(){
+translate([+LENGTH/2-20,0,0])#cube([LENGTH,WIDTH,HEIGHT],center=true);
+generate_side_beams();
+}
+}
+*/
+HDD_WIDTH=84;
+HDD_LENGTH=112;
+doublebeamsupportrectangle(length=HDD_WIDTH,width=HDD_LENGTH);

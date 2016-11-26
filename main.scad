@@ -1,4 +1,5 @@
 include <hex_trap.scad>;
+use <joiner.scad>;
 TOWER_LENGTH=200;
 TOWER_WIDTH=140;
 TOWER_HEIGHT=100;
@@ -41,6 +42,7 @@ FAN_LINING_WIDTH=2;
 FAN_ZIP_TIE_DIST=3;
 FAN_ZIP_TIE_L1=1.5;
 FAN_ZIP_TIE_L2=4.75;
+ZIP_TIE_H=3;
 FAN_CABLE_CUTOUT_RAD=8;
 FAN_CABLE_FROM_TOP_BOTTOM=10;
 FAN_CABLE_FROM_LEFT_RIGHT=4;
@@ -162,7 +164,7 @@ module tower_wall_assembly()
 {
     translate([TOWER_LENGTH/2+BASE_THICKNESS/2+WALL_BASE_THICKNESS/2,0,0]) rotate([0,90,0])tower_panel_fan();
 }
-tower_wall_assembly();
+
 module pine64_beam_support_block_only(x,y)
 {
     
@@ -289,6 +291,55 @@ module mity_beam(length,x1,y1,x2,y2,x3,y3,x4,y4)
     translate([-length/2+MITY_BEAM_TRAP_PART/2,0,0]) mirror([1,0,0]) mity_beam_fixer();    
     
 }
+module double_beam(length,rect_length,rect_width)
+{
+    DOUBLE_BEAM_DIST=PITCH1;
+    DOUBLE_BEAM_INNER_BRIM=1;
+    //translate([0,-10,0])
+    {
+    difference()
+    {
+        union()
+        {
+        for(i=[-1,1]){
+            //Main support
+            translate([0,i*DOUBLE_BEAM_DIST/2,0]) cube([length,MITY_BEAM_THICKNESS,BASE_HEIGHT],center=true);
+            translate([i*DOUBLE_BEAM_DIST/2,0,0]) cube([MITY_BEAM_THICKNESS,rect_length,BASE_HEIGHT],center=true);
+            translate([i*rect_width/2,0,DOUBLE_BEAM_INNER_BRIM/2]) cube([MITY_BEAM_THICKNESS,rect_length,BASE_HEIGHT+DOUBLE_BEAM_INNER_BRIM],center=true);
+            translate([0,i*rect_length/2,DOUBLE_BEAM_INNER_BRIM/2]) cube([rect_width+MITY_BEAM_THICKNESS,MITY_BEAM_THICKNESS,BASE_HEIGHT+DOUBLE_BEAM_INNER_BRIM],center=true);
+            }
+        }
+        union()
+        {
+            //Zip ties
+            for (i=[-1,1]){
+                translate([0,0,-1]){
+                //ACROSS ZIPTIES
+                translate([i*DOUBLE_BEAM_DIST/2,0,0]) color([1,0,0]) cube([MITY_BEAM_THICKNESS+0.1,FAN_ZIP_TIE_L2,ZIP_TIE_H],center=true);
+                translate([i*rect_width/2,0,0]) color([1,0,0]) cube([MITY_BEAM_THICKNESS+0.1,FAN_ZIP_TIE_L2,ZIP_TIE_H],center=true);
+                for (j=[-1,1]){
+                    translate([i*DOUBLE_BEAM_DIST/2,j*(rect_length/2-10),0]) color([1,0,0]) cube([MITY_BEAM_THICKNESS+0.1,FAN_ZIP_TIE_L2,ZIP_TIE_H],center=true);
+                    translate([i*rect_width/2,j*(rect_length/2-10),0]) color([1,0,0]) cube([MITY_BEAM_THICKNESS+0.1,FAN_ZIP_TIE_L2,ZIP_TIE_H],center=true);
+                }
+                }
+                //ALONG ZIPTIES
+                translate([0,0,1]){
+                translate([0,i*DOUBLE_BEAM_DIST/2,0]) color([1,0,0]) cube([FAN_ZIP_TIE_L2,MITY_BEAM_THICKNESS+0.1,ZIP_TIE_H],center=true);
+                translate([0,i*rect_length/2,0]) color([1,0,0]) cube([FAN_ZIP_TIE_L2,MITY_BEAM_THICKNESS+0.1,ZIP_TIE_H],center=true);
+                for (j=[-1,1]){
+                    translate([j*(rect_width/2-10),i*rect_length/2,0]) color([1,0,0]) cube([FAN_ZIP_TIE_L2,MITY_BEAM_THICKNESS+0.1,ZIP_TIE_H],center=true);
+                    translate([j*(rect_width/2-10),i*DOUBLE_BEAM_DIST/2,0]) color([1,0,0]) cube([FAN_ZIP_TIE_L2,MITY_BEAM_THICKNESS+0.1,ZIP_TIE_H],center=true);
+                    }
+                }
+            }    
+        }
+    }
+}
+    //Fixers
+    translate([length/2-MITY_BEAM_TRAP_PART/2,0,0]) mity_beam_fixer();
+    translate([-length/2+MITY_BEAM_TRAP_PART/2,0,0]) mirror([1,0,0]) mity_beam_fixer();    
+    
+}
 
 module beam_holes1(length,width,height)
 {
@@ -335,18 +386,23 @@ module beam(length,width,height,holes1,holes2)
 {
     
     //if (holes2==1) beam_holes2(length=length,width=width,height=height);
-    difference(){
-        cube([length,width,height],center=true);
+    //translate ([0,0,0]) female_connector();
+    //intersection(){
+    //    translate ([0,0,0])     male_connector();
         union(){
-        if (holes1==1) {
-            beam_holes1(length=length,width=width,height=height);
+            difference(){
+                cube([length,width,height],center=true);
+                union(){
+                if (holes1==1) {
+                    beam_holes1(length=length,width=width,height=height);
+                }
+                if (holes2==1) {
+                    beam_holes2(length=length,width=width,height=height);
+                }
+                }
+            }
         }
-        if (holes2==1) {
-            beam_holes2(length=length,width=width,height=height);
-        }
-        }
-    }
-        
+    //}    
 }
 module vertical_beam_traps(length,width,height)
 {
@@ -698,8 +754,12 @@ module singlebeamsupport(x1,y1,x2,y2,x3,y3,x4,y4)
 {
     mity_beam(length=TOWER_WIDTH-BASE_THICKNESS,x1=x1,y1=y1,x2=x2,y2=y2,x3=x3,y3=y3,x4=x4,y4=y4);
 }
+module doublebeamsupportrectangle(length,width)
+{
+    double_beam(length=TOWER_WIDTH-BASE_THICKNESS,rect_length=length,rect_width=width);
+}
 //Assembly
-main_assembly();
+//main_assembly();
 //Pieces
 //beam(TOWER_LENGTH+HOLE_PAD*2+SCREWSTANDARD_M3,BASE_THICKNESS,BASE_HEIGHT,holes1=0,holes2=0);
 //vertical_beam(TOWER_HEIGHT,BASE_THICKNESS,BASE_THICKNESS); 
