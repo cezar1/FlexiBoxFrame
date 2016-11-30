@@ -9,7 +9,7 @@ ENTRY_ANGLE=45;
 MAX_PIECE_SIZE=200;
 
 FIT_WIDTH=0.05;
-FIT_ON_MALE=1;
+FIT_ON_MALE=0;
 
 module male_connector()
 {

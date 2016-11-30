@@ -19,7 +19,7 @@ STRUT1_HEIGHT=3;
 
 MITY_BEAM_THICKNESS=3;
 MITY_BEAM_TRAP_PART=4;
-MITY_LIFT_PCB=4;
+MITY_LIFT_PCB=2;
 MITY_PCB_THICKNESS=2;
 MITY_DIFF1=15;
 MITY_START1=-47.5;
@@ -47,6 +47,93 @@ FAN_CABLE_CUTOUT_RAD=8;
 FAN_CABLE_FROM_TOP_BOTTOM=10;
 FAN_CABLE_FROM_LEFT_RIGHT=4;
 
+FLOOR_BASE_THICK=1.0;
+FLOOR_STRUCTURE_THICK=BASE_THICKNESS;
+FLOOR_STRUCTURE_WIDTH=BASE_THICKNESS;
+WALL_RECT_SIZE=27;
+WALL_RECT_REDUCE=0.2;
+WALL_RECT_EXTRA=1;
+
+
+module tower_side_wall_plug()
+{
+    cube([WALL_RECT_SIZE+WALL_RECT_EXTRA,WALL_RECT_SIZE+WALL_RECT_EXTRA,FLOOR_BASE_THICK],center=true);
+    translate([0,0,FLOOR_BASE_THICK])color([1,0,0])cube([WALL_RECT_SIZE-WALL_RECT_REDUCE,WALL_RECT_SIZE-WALL_RECT_REDUCE,FLOOR_BASE_THICK],center=true);
+}
+tower_side_wall_plug();
+module tower_side_wall()
+{
+    local_width=TOWER_HEIGHT+BASE_THICKNESS;
+    for(i=[-1,1]){
+        translate([i*(TOWER_LENGTH/4+BASE_THICKNESS/4),0,-FLOOR_BASE_THICK/2-BASE_HEIGHT-TOWER_HEIGHT/2]){
+    difference()
+    {
+        union()
+        {
+            
+             color([0.5,1,0]) cube([TOWER_LENGTH/2-BASE_THICKNESS*3/2,TOWER_HEIGHT,FLOOR_BASE_THICK],center=true);
+            
+        }
+        union()
+        {
+            
+            for (j=[-1,1])
+            {
+                for (k=[-1,1])
+                {
+            translate([j*WALL_RECT_SIZE,k*WALL_RECT_SIZE,0]) cube([WALL_RECT_SIZE,WALL_RECT_SIZE,FLOOR_BASE_THICK+0.1],center=true);
+                }
+            }
+        }
+    }
+}
+}
+    for(i=[-1,1])
+    {
+        translate([0,i*(TOWER_HEIGHT/2+BASE_THICKNESS/2),-BASE_THICKNESS/2-BASE_HEIGHT-TOWER_HEIGHT/2]) color([1,0,0]) 
+        rotate([90,0,0])beam(length=TOWER_LENGTH+BASE_THICKNESS,width=FLOOR_STRUCTURE_WIDTH,height=FLOOR_STRUCTURE_THICK,holes1=0,holes2=1);
+        translate([i*(TOWER_LENGTH/2),0,-BASE_THICKNESS/2-BASE_HEIGHT-TOWER_HEIGHT/2]) color([0.5,0,0]) rotate([90,0,90])
+        beam(length=TOWER_HEIGHT+BASE_THICKNESS,width=FLOOR_STRUCTURE_WIDTH,height=FLOOR_STRUCTURE_THICK,holes1=0,holes2=1);
+        translate([i*(BASE_THICKNESS/2),0,-BASE_THICKNESS/2-BASE_HEIGHT-TOWER_HEIGHT/2]) color([0.5,0,0]) rotate([0,0,90])
+        beam(length=TOWER_HEIGHT,width=FLOOR_STRUCTURE_WIDTH,height=FLOOR_STRUCTURE_THICK,holes1=0,holes2=1);
+    }
+}
+//translate([0,BASE_THICKNESS*2,0]) rotate([90,0,0])tower_side_wall();
+/*
+intersection(){
+rotate([180,0,0])tower_side_wall();
+CUBE_LEN=200;
+CUBE_WID=200;
+CUBE_HEIGHT=200;
+translate([CUBE_LEN/2,0,0]) #cube([CUBE_LEN,CUBE_WID,CUBE_HEIGHT],center=true);
+}
+*/
+module tower_floor()
+{
+    for(i=[-1,1])
+    {
+    translate([i*(TOWER_LENGTH/4+BASE_THICKNESS/4),0,-FLOOR_BASE_THICK/2-BASE_HEIGHT-TOWER_HEIGHT/2]) color([0.5,1,0]) cube([TOWER_LENGTH/2-BASE_THICKNESS*3/2,TOWER_WIDTH-BASE_THICKNESS,FLOOR_BASE_THICK],center=true);
+    }
+    for(i=[-1,1])
+    {
+        translate([0,i*TOWER_WIDTH/2,-BASE_THICKNESS/2-BASE_HEIGHT-TOWER_HEIGHT/2]) color([0.5,0,0]) 
+        beam(length=TOWER_LENGTH+BASE_THICKNESS,width=FLOOR_STRUCTURE_WIDTH,height=FLOOR_STRUCTURE_THICK,holes1=0,holes2=1);
+        translate([i*TOWER_LENGTH/2,0,-BASE_THICKNESS/2-BASE_HEIGHT-TOWER_HEIGHT/2]) color([0.5,0,0]) rotate([0,0,90])
+        beam(length=TOWER_WIDTH,width=FLOOR_STRUCTURE_WIDTH,height=FLOOR_STRUCTURE_THICK,holes1=0,holes2=1);
+        translate([i*BASE_THICKNESS/2,0,-BASE_THICKNESS/2-BASE_HEIGHT-TOWER_HEIGHT/2]) color([0.5,0,0]) rotate([0,0,90])
+        beam(length=TOWER_WIDTH-BASE_THICKNESS,width=FLOOR_STRUCTURE_WIDTH,height=FLOOR_STRUCTURE_THICK,holes1=0,holes2=1);
+    }
+    
+}
+/*
+intersection(){
+rotate([180,0,0]) tower_floor();
+CUBE_LEN=200;
+CUBE_WID=200;
+CUBE_HEIGHT=200;
+translate([CUBE_LEN/2,0,0]) #cube([CUBE_LEN,CUBE_WID,CUBE_HEIGHT],center=true);
+}
+*/
 module tower_wall_mount(block,hole)
 {
     temp=WALL_MOUNT_THICKNESS/2-WALL_BASE_THICKNESS/2;
@@ -203,21 +290,22 @@ module pine64_beam_support(x,y)
     }
 }
 
-module mity_beam_support(x,y)
+module mity_beam_support(x,y,standard)
 {
     
     //temp_nutheight=0;
+    temp_standard=standard;
     temp_nutheight=BASE_HEIGHT;
     translate([x,y,0]){
         difference(){
             union(){
     
                 
-                translate([0,0,BASE_HEIGHT/2+MITY_LIFT_PCB/2]) cylinder(r=SCREWSTANDARD_M3*1.5,h=MITY_LIFT_PCB,center=true);
+                translate([0,0,BASE_HEIGHT/2+MITY_LIFT_PCB/2]) cylinder(r=temp_standard*1.5,h=MITY_LIFT_PCB,center=true);
                 translate([0,0,0]) cube([BASE_HEIGHT,BASE_HEIGHT,BASE_HEIGHT],center=true);}
             union(){
-                translate([0,0,SCREW_SIZE1-BASE_HEIGHT/2-0.1]) color([0,1,0])hex_hole(h_trap=temp_nutheight,h_hole=SCREW_SIZE1-temp_nutheight,r_trap=SCREWSTANDARD_M3,rot=180);
-                translate([0,0,12-BASE_HEIGHT/2+0.1]) color([0,1,0])hex_hole(h_trap=NUTHEIGHT_M3,h_hole=0,r_trap=SCREWSTANDARD_M3,rot=180);
+                translate([0,0,SCREW_SIZE1-BASE_HEIGHT/2-0.1]) color([0,1,0])hex_hole(h_trap=temp_nutheight,h_hole=SCREW_SIZE1-temp_nutheight,r_trap=temp_standard,rot=180);
+                translate([0,0,12-BASE_HEIGHT/2+0.1]) color([0,1,0])hex_hole(h_trap=NUTHEIGHT_M3,h_hole=0,r_trap=temp_standard,rot=180);
             }
         }
     }
@@ -248,10 +336,10 @@ module mity_beam_fixer()
             
         }
 }
-module mity_beam(length,x1,y1,x2,y2,x3,y3,x4,y4)
+module mity_beam(length,x1,y1,x2,y2,x3,y3,x4,y4,standard)
 {
-    mity_beam_support(x=x1,y=y1);    
-    mity_beam_support(x=x2,y=y2);
+    mity_beam_support(x=x1,y=y1,standard=standard);    
+    mity_beam_support(x=x2,y=y2,standard=standard);
     
     if (y1>0)
     {
@@ -271,8 +359,8 @@ module mity_beam(length,x1,y1,x2,y2,x3,y3,x4,y4)
     {
         translate([x2,y2/2-MITY_BEAM_THICKNESS/4+BASE_THICKNESS/4,0]) color ([0,1,0]) cube([MITY_BEAM_THICKNESS,abs(y2)-BASE_THICKNESS/2-MITY_BEAM_THICKNESS/2,BASE_HEIGHT],center=true);
     }
-    mity_beam_support(x=x3,y=y3);
-    mity_beam_support(x=x4,y=y4);
+    mity_beam_support(x=x3,y=y3,standard=standard);
+    mity_beam_support(x=x4,y=y4,standard=standard);
     if (y3>0)
     {
         translate([x3,-y3/2-MITY_BEAM_THICKNESS/4+BASE_THICKNESS/4,0]) color ([1,1,0]) cube([MITY_BEAM_THICKNESS,abs(y3)-BASE_THICKNESS/2-MITY_BEAM_THICKNESS/2,BASE_HEIGHT],center=true);
@@ -294,7 +382,7 @@ module mity_beam(length,x1,y1,x2,y2,x3,y3,x4,y4)
 module double_beam(length,rect_length,rect_width)
 {
     DOUBLE_BEAM_DIST=PITCH1;
-    DOUBLE_BEAM_INNER_BRIM=1;
+    DOUBLE_BEAM_INNER_BRIM=5;
     //translate([0,-10,0])
     {
     difference()
@@ -349,14 +437,67 @@ module beam_holes1(length,width,height)
         }
     }
 }
+//beam_holes2(length=100,center_hole=0);
+BRIDGE_HOLE_SUPPORT=0.31;
 module beam_holes2()
 {
-    for (i=[-floor((length-PITCH1)/2/PITCH1):1:floor((length-PITCH1)/2/PITCH1)]) color([0,1,0]) translate([i*PITCH1,SCREW_SIZE1-BASE_THICKNESS/2,0]) rotate([-90,0,0]) hex_hole(h_trap=NUTHEIGHT_M3+0.1,h_hole=SCREW_SIZE1-NUTHEIGHT_M3,r_trap=SCREWSTANDARD_M3,rot=180);
-    for (i=[-floor((length-PITCH1)/2/PITCH1):1:floor((length-PITCH1)/2/PITCH1)]) color([0,1,0]) translate([i*PITCH1,-SCREW_SIZE1+BASE_THICKNESS/2,0]) rotate([-90,0,180]) hex_hole(h_trap=NUTHEIGHT_M3+0.1,h_hole=SCREW_SIZE1-NUTHEIGHT_M3,r_trap=SCREWSTANDARD_M3,rot=180);
+    
+    difference()
+    {
+    union()
+    {
+    for (i=[-floor((length-PITCH1)/2/PITCH1):1:floor((length-PITCH1)/2/PITCH1)]) color([0,1,0]) 
+        {
+            if (center_hole==1 && i==0 || i!=0)
+            {
+                
+                    translate([i*PITCH1,SCREW_SIZE1-BASE_THICKNESS/2,0]) {
+                    rotate([-90,0,0]) hex_hole(h_trap=NUTHEIGHT_M3+0.1,h_hole=SCREW_SIZE1-NUTHEIGHT_M3,r_trap=SCREWSTANDARD_M3,rot=180);
+                }
+            }
+        }
+    for (i=[-floor((length-PITCH1)/2/PITCH1):1:floor((length-PITCH1)/2/PITCH1)]) color([0,1,0]) 
+        if (center_hole==1 && i==0 || i!=0)
+        {
+            translate([i*PITCH1,-SCREW_SIZE1+BASE_THICKNESS/2,0]) rotate([-90,0,180]) hex_hole(h_trap=NUTHEIGHT_M3+0.1,h_hole=SCREW_SIZE1-NUTHEIGHT_M3,r_trap=SCREWSTANDARD_M3,rot=180);
+        }
+    }
+    //CREATE THIN LAYER TO SUPPORT CONSTRUCTION
+    union(){
+        for (i=[-floor((length-PITCH1)/2/PITCH1):1:floor((length-PITCH1)/2/PITCH1)]) color([1,0,0])
+            
+        {
+            translate([i*PITCH1,SCREW_SIZE1-BASE_THICKNESS/2,0])
+            union()
+                        {
+                        translate([0,-SCREW_SIZE1+NUTHEIGHT_M3,0]) cube([BASE_THICKNESS,BRIDGE_HOLE_SUPPORT,BASE_THICKNESS],center=true);
+                        translate([0,-SCREW_SIZE1+BASE_THICKNESS-NUTHEIGHT_M3,0]) cube([BASE_THICKNESS,BRIDGE_HOLE_SUPPORT,BASE_THICKNESS],center=true);    
+                        }
+        } 
+    }
+    }
         
-    for (i=[-floor((length-PITCH1)/2/PITCH1):1:floor((length-PITCH1*3)/2/PITCH1)]) color([0,1,0]) translate([i*PITCH1+PITCH1/2,0,SCREW_SIZE1-BASE_HEIGHT/2]) rotate([0,0,0]) hex_hole(h_trap=NUTHEIGHT_M3+0.1,h_hole=SCREW_SIZE1-NUTHEIGHT_M3,r_trap=SCREWSTANDARD_M3,rot=180);
-    for (i=[-floor((length-PITCH1)/2/PITCH1):1:floor((length-PITCH1*3)/2/PITCH1)]) color([0,1,0]) translate([i*PITCH1+PITCH1/2,0,-SCREW_SIZE1+BASE_HEIGHT/2]) rotate([0,180,0]) hex_hole(h_trap=NUTHEIGHT_M3+0.1,h_hole=SCREW_SIZE1-NUTHEIGHT_M3,r_trap=SCREWSTANDARD_M3,rot=180);
-        
+    difference()
+    {
+        union()
+        {
+        for (i=[-floor((length-PITCH1)/2/PITCH1):1:floor((length-PITCH1*3)/2/PITCH1)]) color([0,1,0]) 
+            
+                translate([i*PITCH1+PITCH1/2,0,SCREW_SIZE1-BASE_HEIGHT/2]) rotate([0,0,0]) hex_hole(h_trap=NUTHEIGHT_M3+0.1,h_hole=SCREW_SIZE1-NUTHEIGHT_M3,r_trap=SCREWSTANDARD_M3,rot=180);
+            
+        for (i=[-floor((length-PITCH1)/2/PITCH1):1:floor((length-PITCH1*3)/2/PITCH1)]) color([0,1,0]) 
+            
+                translate([i*PITCH1+PITCH1/2,0,-SCREW_SIZE1+BASE_HEIGHT/2]) rotate([0,180,0]) hex_hole(h_trap=NUTHEIGHT_M3+0.1,h_hole=SCREW_SIZE1-NUTHEIGHT_M3,r_trap=SCREWSTANDARD_M3,rot=180);
+        }   
+        union()
+        {
+        for (i=[-floor((length-PITCH1)/2/PITCH1):1:floor((length-PITCH1*3)/2/PITCH1)]) color([1,0,0]) 
+        {
+            translate([i*PITCH1+PITCH1/2,0,NUTHEIGHT_M3-BASE_HEIGHT/2]) cube([BASE_THICKNESS,BASE_THICKNESS,BRIDGE_HOLE_SUPPORT],center=true);
+            translate([i*PITCH1+PITCH1/2,0,BASE_HEIGHT/2-NUTHEIGHT_M3]) cube([BASE_THICKNESS,BASE_THICKNESS,BRIDGE_HOLE_SUPPORT],center=true);
+        }
+        }
+    }    
 }
 module beam_side_traps()
 {
@@ -382,22 +523,22 @@ module beam_side_inner_fixes(length,plate_length,plate_thickness)
     translate([-length/2+plate_length/2-BASE_THICKNESS/2,BASE_THICKNESS/2+plate_thickness/8,0])cube([BASE_THICKNESS*2,plate_thickness,BASE_THICKNESS],center=true);
     translate([length/2-plate_length/2+BASE_THICKNESS/2,BASE_THICKNESS/2+plate_thickness/8,0])cube([BASE_THICKNESS*2,plate_thickness,BASE_THICKNESS],center=true);
 }
-module beam(length,width,height,holes1,holes2)
+module beam(length,width,height,holes1,holes2,center_hole)
 {
     
     //if (holes2==1) beam_holes2(length=length,width=width,height=height);
     //translate ([0,0,0]) female_connector();
     //intersection(){
-    //    translate ([0,0,0])     male_connector();
+    //    translate ([0,0,0])     female_connector();
         union(){
             difference(){
                 cube([length,width,height],center=true);
                 union(){
                 if (holes1==1) {
-                    beam_holes1(length=length,width=width,height=height);
+                    beam_holes1(length=length,width=width,height=height,center_hole=center_hole);
                 }
                 if (holes2==1) {
-                    beam_holes2(length=length,width=width,height=height);
+                    beam_holes2(length=length,width=width,height=height,center_hole=center_hole);
                 }
                 }
             }
@@ -750,9 +891,9 @@ module adapter1()
         }
     }
 }
-module singlebeamsupport(x1,y1,x2,y2,x3,y3,x4,y4)
+module singlebeamsupport(x1,y1,x2,y2,x3,y3,x4,y4,standard)
 {
-    mity_beam(length=TOWER_WIDTH-BASE_THICKNESS,x1=x1,y1=y1,x2=x2,y2=y2,x3=x3,y3=y3,x4=x4,y4=y4);
+    mity_beam(length=TOWER_WIDTH-BASE_THICKNESS,x1=x1,y1=y1,x2=x2,y2=y2,x3=x3,y3=y3,x4=x4,y4=y4,standard=standard);
 }
 module doublebeamsupportrectangle(length,width)
 {

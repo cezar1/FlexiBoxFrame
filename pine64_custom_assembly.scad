@@ -36,8 +36,8 @@ intersection(){
 translate([-LENGTH/2+20,0,0])#cube([LENGTH,WIDTH,HEIGHT],center=true);
 generate_side_beams();
 }
-*/
-/*//Female side beams
+//*/
+//Female side beams
 rotate([180,0,0]){
 LENGTH=250;
 WIDTH=30;
@@ -47,7 +47,21 @@ translate([+LENGTH/2-20,0,0])#cube([LENGTH,WIDTH,HEIGHT],center=true);
 generate_side_beams();
 }
 }
-*/
+//*/
+/*
 HDD_WIDTH=84;
 HDD_LENGTH=112;
 doublebeamsupportrectangle(length=HDD_WIDTH,width=HDD_LENGTH);
+*/
+/*
+PI BEAM
+SHIFT_X=20;
+PI_HOLES_LENGTH=58;
+PI_HOLES_WIDTH=49;
+singlebeamsupport(x1=-PI_HOLES_LENGTH/2-SHIFT_X,y1=PI_HOLES_WIDTH/2,x2=-PI_HOLES_LENGTH/2-SHIFT_X,y2=-PI_HOLES_WIDTH/2,x3=PI_HOLES_LENGTH/2-SHIFT_X,y3=PI_HOLES_WIDTH/2,x4=PI_HOLES_LENGTH/2-SHIFT_X,y4=-PI_HOLES_WIDTH/2,standard=2);
+*/
+/*
+SWITCH_WIDTH=78;
+SWITCH_LENGTH=112;
+doublebeamsupportrectangle(length=SWITCH_WIDTH,width=SWITCH_LENGTH);
+*/

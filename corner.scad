@@ -1,18 +1,29 @@
 include <main.scad>;
 
 CORNER_LENGTH=PITCH1*1.5;
-CORNER_THICK=1.2;
+CORNER_THICK=3;
 CORNER_HEIGHT_ADD=0.1;
-
+CORNER_SIDES=1;
 module corner()
 {
+    for (i=[-1,1])
+        {
+            hull(){
+            translate([0,-CORNER_THICK/2-BASE_THICKNESS/2-CORNER_HEIGHT_ADD/2,BASE_THICKNESS/2*i+CORNER_SIDES/2*i+CORNER_THICK*i+CORNER_HEIGHT_ADD/2*i]) color([0,0,1]) cube([CORNER_LENGTH,CORNER_THICK-CORNER_HEIGHT_ADD,CORNER_SIDES],center=true);
+            translate([0,CORNER_THICK/2-BASE_THICKNESS/2-CORNER_HEIGHT_ADD/2,BASE_THICKNESS/2*i+CORNER_SIDES/2*i+CORNER_HEIGHT_ADD/2*i+CORNER_THICK/2*i]) color([0,0,1]) cube([CORNER_LENGTH,CORNER_THICK/2,CORNER_SIDES],center=true);
+            }
+        }
+        
     //Side plate
     difference()
     {
-        translate([0,-CORNER_THICK/2-BASE_THICKNESS/2-CORNER_HEIGHT_ADD/2,0]) color([1,0,0]) cube([CORNER_LENGTH,CORNER_THICK-CORNER_HEIGHT_ADD,BASE_HEIGHT+CORNER_HEIGHT_ADD],center=true);
+        translate([0,-CORNER_THICK/2-BASE_THICKNESS/2-CORNER_HEIGHT_ADD/2,0]) color([1,1,0]) cube([CORNER_LENGTH,CORNER_THICK-CORNER_HEIGHT_ADD,BASE_HEIGHT+CORNER_HEIGHT_ADD],center=true);
+        
+            
         translate([0,-CORNER_THICK-CORNER_HEIGHT_ADD-BASE_THICKNESS/2,0]) rotate([90,0,0])hex_hole(h_trap=0,h_hole=CORNER_THICK+0.1,r_trap=SCREWSTANDARD_M3,rot=180);
         
     }
+    
     
 difference()
 {
@@ -37,7 +48,8 @@ difference()
 }
 
 //beam(length=200,width=BASE_THICKNESS,height=BASE_HEIGHT,holes1=1,holes2=1);
-rotate([90,0,0]) corner();
+rotate([90,0,0]) 
+corner();
 
 
 
