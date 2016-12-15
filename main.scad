@@ -51,19 +51,24 @@ FLOOR_BASE_THICK=1.0;
 FLOOR_STRUCTURE_THICK=BASE_THICKNESS;
 FLOOR_STRUCTURE_WIDTH=BASE_THICKNESS;
 WALL_RECT_SIZE=27;
-WALL_RECT_REDUCE=0.2;
+WALL_RECT_POSITION1=23;
+WALL_PLUG_RIM=3;
+WALL_PLUG_RIM_INNER=1;
+WALL_PLUG_RIM_HEIGHT=1;
+WALL_RECT_REDUCE=0.25;
 WALL_RECT_EXTRA=1;
 
 
 module tower_side_wall_plug()
 {
-    cube([WALL_RECT_SIZE+WALL_RECT_EXTRA,WALL_RECT_SIZE+WALL_RECT_EXTRA,FLOOR_BASE_THICK],center=true);
-    translate([0,0,FLOOR_BASE_THICK])color([1,0,0])cube([WALL_RECT_SIZE-WALL_RECT_REDUCE,WALL_RECT_SIZE-WALL_RECT_REDUCE,FLOOR_BASE_THICK],center=true);
+    cube([WALL_RECT_SIZE-WALL_RECT_REDUCE*2,WALL_RECT_SIZE-WALL_RECT_REDUCE*2,FLOOR_BASE_THICK],center=true);
+    translate([0,0,FLOOR_BASE_THICK/2+WALL_PLUG_RIM_HEIGHT/2])color([1,0,0])cube([WALL_RECT_SIZE+WALL_RECT_EXTRA-WALL_RECT_REDUCE*2,WALL_RECT_SIZE+WALL_RECT_EXTRA-WALL_RECT_REDUCE*2,WALL_PLUG_RIM_HEIGHT],center=true);
 }
-tower_side_wall_plug();
+//rotate([180,0,0]) tower_side_wall_plug();
 module tower_side_wall()
 {
     local_width=TOWER_HEIGHT+BASE_THICKNESS;
+    local_displacement=WALL_RECT_POSITION1;
     for(i=[-1,1]){
         translate([i*(TOWER_LENGTH/4+BASE_THICKNESS/4),0,-FLOOR_BASE_THICK/2-BASE_HEIGHT-TOWER_HEIGHT/2]){
     difference()
@@ -72,6 +77,26 @@ module tower_side_wall()
         {
             
              color([0.5,1,0]) cube([TOWER_LENGTH/2-BASE_THICKNESS*3/2,TOWER_HEIGHT,FLOOR_BASE_THICK],center=true);
+            difference(){
+                union(){
+                    for (j=[-1,1])
+                    {
+                        for (k=[-1,1])
+                        {
+                    translate([j*local_displacement,k*local_displacement,-WALL_PLUG_RIM_HEIGHT]) color ([0,1,0]) cube([WALL_RECT_SIZE+WALL_PLUG_RIM*2,WALL_RECT_SIZE+WALL_PLUG_RIM*2,WALL_PLUG_RIM_HEIGHT],center=true);
+                        }
+                    }
+        }
+                union(){
+                    for (j=[-1,1])
+                    {
+                        for (k=[-1,1])
+                        {
+                    translate([j*local_displacement,k*local_displacement,-WALL_PLUG_RIM_HEIGHT]) color ([0,1,0]) cube([WALL_RECT_SIZE+WALL_PLUG_RIM_INNER*2,WALL_RECT_SIZE+WALL_PLUG_RIM_INNER*2,WALL_PLUG_RIM_HEIGHT+0.1],center=true);
+                        }
+                    }
+                }
+        }
             
         }
         union()
@@ -81,7 +106,7 @@ module tower_side_wall()
             {
                 for (k=[-1,1])
                 {
-            translate([j*WALL_RECT_SIZE,k*WALL_RECT_SIZE,0]) cube([WALL_RECT_SIZE,WALL_RECT_SIZE,FLOOR_BASE_THICK+0.1],center=true);
+            translate([j*local_displacement,k*local_displacement,0]) cube([WALL_RECT_SIZE,WALL_RECT_SIZE,FLOOR_BASE_THICK+0.1],center=true);
                 }
             }
         }
@@ -246,12 +271,71 @@ module tower_panel_fan()
     
     
 }
-
+module tower_panel_filter()
+{
+    local_height=TOWER_HEIGHT+BASE_THICKNESS*2;
+    //Holder beams
+    cube([local_height,BASE_THICKNESS,WALL_BASE_THICKNESS],center=true);
+    cube([BASE_THICKNESS,TOWER_WIDTH,WALL_BASE_THICKNESS],center=true);
+    difference()
+    {
+        union()
+        {
+            //Main panel
+            color([1,0,0])tower_wall_front_rear();
+            //Lining
+            translate([0,0,WALL_BASE_THICKNESS]){
+                difference(){
+                    cube([local_height,TOWER_WIDTH+BASE_THICKNESS,WALL_BASE_THICKNESS],center=true);
+                    cube([local_height-BASE_THICKNESS*2,TOWER_WIDTH-BASE_THICKNESS,WALL_BASE_THICKNESS+0.1],center=true);
+                }
+            }
+            //Wall mounting blocks
+            for (j=[1,-1]){
+                for (i=[2,1,-1,-2]){
+                    translate([j*(TOWER_HEIGHT/2+BASE_THICKNESS/2),i*PITCH1,0])tower_wall_mount(block=true);
+                }
+            }
+            //Loopable supports
+            for (i=[0.35,0,-0.35]){
+                translate([i*(local_height-BASE_THICKNESS),0,WALL_MOUNT_THICKNESS+WALL_BASE_THICKNESS]) color ([0,0,1]) cube([BASE_THICKNESS,TOWER_WIDTH+BASE_THICKNESS,WALL_BASE_THICKNESS],center=true);
+                translate([i*(local_height-BASE_THICKNESS),0,WALL_MOUNT_THICKNESS/2+WALL_BASE_THICKNESS/2]) cube([BASE_THICKNESS,0.7,WALL_MOUNT_THICKNESS],center=true);
+                for (j=[-1,1]){
+                    translate([i*(local_height-BASE_THICKNESS),j*TOWER_WIDTH/2,WALL_MOUNT_THICKNESS/2+WALL_BASE_THICKNESS/2]) cube([BASE_THICKNESS,BASE_THICKNESS,WALL_MOUNT_THICKNESS],center=true);
+                }
+            }
+            ADD_ASSY_SUPPORT=0.4;
+            DIFF_ASSY_SUPPORT=1-0.35/2;
+            //Assymetric supports
+            translate([(local_height-BASE_THICKNESS)/2,0,WALL_MOUNT_THICKNESS/2+WALL_BASE_THICKNESS/2+ADD_ASSY_SUPPORT/2]) cube([BASE_THICKNESS,BASE_THICKNESS,WALL_MOUNT_THICKNESS+ADD_ASSY_SUPPORT],center=true);
+            translate([local_height/2-local_height*DIFF_ASSY_SUPPORT/2,0,WALL_MOUNT_THICKNESS+WALL_BASE_THICKNESS+ADD_ASSY_SUPPORT]) cube([local_height*DIFF_ASSY_SUPPORT,BASE_THICKNESS,WALL_BASE_THICKNESS],center=true);
+        }
+        union()
+        {
+            //Main fain cutout
+            cube([local_height-BASE_THICKNESS*3,TOWER_WIDTH-BASE_THICKNESS*2,WALL_BASE_THICKNESS+0.1],center=true);
+            //Wall mounting blocks
+            for (j=[1,-1]){
+                for (i=[2,1,-1,-2]){
+                    translate([j*(TOWER_HEIGHT/2+BASE_THICKNESS/2),i*PITCH1,0])tower_wall_mount(hole=true);
+                }
+            }
+            
+            
+        }
+    }
+    
+    
+    
+    
+}
 module tower_wall_assembly()
 {
     translate([TOWER_LENGTH/2+BASE_THICKNESS/2+WALL_BASE_THICKNESS/2,0,0]) rotate([0,90,0])tower_panel_fan();
+    translate([-TOWER_LENGTH/2-BASE_THICKNESS/2-WALL_BASE_THICKNESS/2,0,0]) rotate([0,-90,0])tower_panel_filter();
 }
-
+tower_panel_filter();
+//tower_wall_assembly();
 module pine64_beam_support_block_only(x,y)
 {
     
@@ -381,8 +465,8 @@ module mity_beam(length,x1,y1,x2,y2,x3,y3,x4,y4,standard)
 }
 module double_beam(length,rect_length,rect_width)
 {
-    DOUBLE_BEAM_DIST=PITCH1;
-    DOUBLE_BEAM_INNER_BRIM=5;
+    DOUBLE_BEAM_DIST=PITCH1-5;
+    DOUBLE_BEAM_INNER_BRIM=1;
     //translate([0,-10,0])
     {
     difference()
@@ -391,8 +475,8 @@ module double_beam(length,rect_length,rect_width)
         {
         for(i=[-1,1]){
             //Main support
-            translate([0,i*DOUBLE_BEAM_DIST/2,0]) cube([length,MITY_BEAM_THICKNESS,BASE_HEIGHT],center=true);
-            translate([i*DOUBLE_BEAM_DIST/2,0,0]) cube([MITY_BEAM_THICKNESS,rect_length,BASE_HEIGHT],center=true);
+            translate([0,i*DOUBLE_BEAM_DIST/2,-BASE_HEIGHT/4]) cube([length,MITY_BEAM_THICKNESS,BASE_HEIGHT/2],center=true);
+            translate([i*DOUBLE_BEAM_DIST/2,0,-BASE_HEIGHT/4]) cube([MITY_BEAM_THICKNESS,rect_length,BASE_HEIGHT/2],center=true);
             translate([i*rect_width/2,0,DOUBLE_BEAM_INNER_BRIM/2]) cube([MITY_BEAM_THICKNESS,rect_length,BASE_HEIGHT+DOUBLE_BEAM_INNER_BRIM],center=true);
             translate([0,i*rect_length/2,DOUBLE_BEAM_INNER_BRIM/2]) cube([rect_width+MITY_BEAM_THICKNESS,MITY_BEAM_THICKNESS,BASE_HEIGHT+DOUBLE_BEAM_INNER_BRIM],center=true);
             }
@@ -411,7 +495,7 @@ module double_beam(length,rect_length,rect_width)
                 }
                 }
                 //ALONG ZIPTIES
-                translate([0,0,1]){
+                translate([0,0,-1]){
                 translate([0,i*DOUBLE_BEAM_DIST/2,0]) color([1,0,0]) cube([FAN_ZIP_TIE_L2,MITY_BEAM_THICKNESS+0.1,ZIP_TIE_H],center=true);
                 translate([0,i*rect_length/2,0]) color([1,0,0]) cube([FAN_ZIP_TIE_L2,MITY_BEAM_THICKNESS+0.1,ZIP_TIE_H],center=true);
                 for (j=[-1,1]){
@@ -438,7 +522,7 @@ module beam_holes1(length,width,height)
     }
 }
 //beam_holes2(length=100,center_hole=0);
-BRIDGE_HOLE_SUPPORT=0.31;
+BRIDGE_HOLE_SUPPORT=0.0;
 module beam_holes2()
 {
     
